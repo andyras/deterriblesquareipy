@@ -178,9 +178,10 @@ class Square(wx.Frame):
 
         # self.dirname provides a persistent memory of the last directory visited
         if 'self.dirname' not in locals():
-            self.dirname = ''
+            self.dirname = '.'
 
-        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
+        wildcards = "TIF files (*.tif)|*.tif|PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg"
+        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", wildcards, wx.OPEN)
         if (dlg.ShowModal() == wx.ID_OK):
             img = wx.Image(dlg.GetPath())
             self.myImg.SetBitmap(wx.BitmapFromImage(img))
