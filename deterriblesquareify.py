@@ -53,10 +53,15 @@ class Square(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.onQ4u10, q4u10)
         self.Bind(wx.EVT_BUTTON, self.onQ4d10, q4d10)
 
+        self.Bind(wx.EVT_BUTTON, self.onLoad, loadBtn)
+        self.Bind(wx.EVT_BUTTON, self.onSave, saveBtn)
+        self.Bind(wx.EVT_BUTTON, self.onReset, resetBtn)
+        self.Bind(wx.EVT_BUTTON, self.onAuto, autoBtn)
+
         # create image object
         img = wx.Image('test2.tif')
         #img = wx.Image('test2.tif', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(img))
+        self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(img))
         #wx.StaticBitmap(self, -1, img, (10,5), (img.GetWidth(), img.GetHeight()))
 
         # create sizers to hold objects
@@ -99,9 +104,9 @@ class Square(wx.Frame):
 
         imageSizer.Add(LBtnSizer, 1, wx.EXPAND)
         #imageSizer.Add((1,1), 1)
-        #imageSizer.Add(myImg, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.ADJUST_MINSIZE, 10)
-        #imageSizer.Add(myImg, 0, wx.ALL, border=10)
-        imageSizer.Add(myImg, 1, wx.EXPAND)
+        #imageSizer.Add(self.myImg, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.ADJUST_MINSIZE, 10)
+        #imageSizer.Add(self.myImg, 0, wx.ALL, border=10)
+        imageSizer.Add(self.myImg, 1, wx.EXPAND)
         #imageSizer.Add((1,1), 1)
         imageSizer.Add(RBtnSizer, 1, wx.EXPAND)
 
@@ -163,6 +168,33 @@ class Square(wx.Frame):
 
     def onQ4d10(self, event):
         print 'Subtracting 10 from pixels in Q4'
+
+    def onLoad(self, e=None):
+        '''
+        Load an image file.
+        '''
+
+        print 'Loading...'
+
+        # self.dirname provides a persistent memory of the last directory visited
+        if 'self.dirname' not in locals():
+            self.dirname = ''
+
+        dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
+        if (dlg.ShowModal() == wx.ID_OK):
+            img = wx.Image(dlg.GetPath())
+            self.myImg.SetBitmap(wx.BitmapFromImage(img))
+            self.panel.Refresh()
+
+    def onSave(self, e=None):
+        print 'Saving...'
+
+    def onReset(self, e=None):
+        print 'Resetting image...'
+
+    def onAuto(self, e=None):
+        print 'Autotuning...'
+
 
 # Run the program
 if __name__ == '__main__':
