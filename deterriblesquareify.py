@@ -339,18 +339,22 @@ class Square(wx.Frame):
             q = 1
             insideEdge = q1l + q1b
             outsideEdge = q2r + q4t
+            print 'Q1 will be adjusted'
         elif (max(rmsQ1, rmsQ2, rmsQ3, rmsQ4) == rmsQ2):
             q = 2
             insideEdge = q2r + q2b
             outsideEdge = q1l + q3t
+            print 'Q2 will be adjusted'
         elif (max(rmsQ1, rmsQ2, rmsQ3, rmsQ4) == rmsQ3):
             q = 3
             insideEdge = q3r + q3t
             outsideEdge = q4l + q2b
+            print 'Q3 will be adjusted'
         else:
             q = 4
             insideEdge = q4l + q4t
             outsideEdge = q3r + q1b
+            print 'Q4 will be adjusted'
 
         ## find n which minimizes the rms difference in grayscale intensity along edges of quadrant
         n = 0
@@ -377,7 +381,9 @@ class Square(wx.Frame):
             print 'newRMSValue is %s' % newRMSValue
 
         ## adjust the quadrant
-        self.adjustQuadrant(q, n)
+        print 'Adjusting Q1 by %d grayscale values' % (n - nSign)
+        self.adjustQuadrant(q, n - nSign)
+        print 'FINISHED AUTOTUNE'
 
     def rms(self, v1, v2):
         return self.rmsAdjust(v1, v2, 0)
