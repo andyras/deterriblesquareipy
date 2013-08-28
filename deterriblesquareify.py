@@ -64,7 +64,7 @@ class Square(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.onLoad, loadBtn)
         self.Bind(wx.EVT_BUTTON, self.onSave, saveBtn)
         self.Bind(wx.EVT_BUTTON, self.onReset, resetBtn)
-        self.Bind(wx.EVT_BUTTON, self.onReset, autoBtn)
+        self.Bind(wx.EVT_BUTTON, self.onAuto, autoBtn)
 
         self.Bind(wx.EVT_SIZE, self.onSize)
 
@@ -406,7 +406,7 @@ class Square(wx.Frame):
         return (squareSum/len(v1))**0.5
 
     def onSize(self, e=None):
-        self.imgSize = self.imgSizer.GetSize()[0]
+        self.imgSize = self.imgSizer.GetSize()[1]
         print 'Height of image sizer is '+str(self.imgSize)
         self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
         self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
