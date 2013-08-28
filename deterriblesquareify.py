@@ -10,8 +10,13 @@ class Square(wx.Frame):
         self.panel = wx.Panel(self, wx.ID_ANY)
 
         # define the maximum displayed image size in pixels
-        self.maxImageSize = 1000
+        self.maxImgSize = 1200
+        self.imgSize = 400
+        # initially the path to an image is not set
         self.imagePath = ''
+
+        # set the minimum and maximum window sizes
+        self.SetSizeHints(400,300,1200,800)
 
         # create buttons
         q1u1 = wx.Button(self.panel, wx.ID_ANY, '+1')
@@ -59,11 +64,17 @@ class Square(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.onReset, resetBtn)
         self.Bind(wx.EVT_BUTTON, self.onAuto, autoBtn)
 
+        self.Bind(wx.EVT_SIZE, self.onSize)
+
         # create image object
-        img = wx.Image('test2.tif')
+        #img = wx.Image('test2.tif')
         #img = wx.Image('test2.tif', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(img))
+        #self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(img))
         #wx.StaticBitmap(self, -1, img, (10,5), (img.GetWidth(), img.GetHeight()))
+        self.currentImg = wx.EmptyImage(self.imgSize, self.imgSize)
+        self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(self.currentImg))
+        # clicking the blank image brings up the file loading dialog
+        self.myImg.Bind(wx.EVT_LEFT_DOWN, self.onLoad)
 
         # create sizers to hold objects
         topSizer = wx.BoxSizer(wx.VERTICAL)
@@ -72,11 +83,13 @@ class Square(wx.Frame):
         # sizer for reset/auto buttons
         resetAutoSizer = wx.BoxSizer(wx.HORIZONTAL)
         # sizer for image and manipulation buttons
-        imageSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.imgSizer = wx.BoxSizer(wx.HORIZONTAL)
         # sizer for Q2, Q3 buttons
         LBtnSizer = wx.GridSizer(rows=4,cols=2, hgap=0, vgap=0)
+        LBtnSizer.SetMinSize((100,100))
         # sizer for Q1, Q4 buttons
         RBtnSizer = wx.GridSizer(rows=4,cols=2, hgap=0, vgap=0)
+        RBtnSizer.SetMinSize((100,100))
 
         # add objects to sizers
         loadSaveSizer.Add(loadBtn, 1, wx.EXPAND, 0)
@@ -103,24 +116,26 @@ class Square(wx.Frame):
         RBtnSizer.Add(q4d1, 1, wx.EXPAND, 0)
         RBtnSizer.Add(q4d10, 1, wx.EXPAND, 0)
 
-        imageSizer.Add(LBtnSizer, 1, wx.EXPAND)
-        #imageSizer.Add((1,1), 1)
-        #imageSizer.Add(self.myImg, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.ADJUST_MINSIZE, 10)
-        #imageSizer.Add(self.myImg, 0, wx.ALL, border=10)
-        imageSizer.Add(self.myImg, 1, wx.EXPAND)
-        #imageSizer.Add((1,1), 1)
-        imageSizer.Add(RBtnSizer, 1, wx.EXPAND)
+        self.imgSizer.Add(LBtnSizer, 1, wx.EXPAND)
+        #self.imgSizer.Add((1,1), 1)
+        #self.imgSizer.Add(self.myImg, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.ADJUST_MINSIZE, 10)
+        #self.imgSizer.Add(self.myImg, 0, wx.ALL, border=10)
+        self.imgSizer.Add(self.myImg, 0, wx.EXPAND)
+        #self.imgSizer.Add((1,1), 1)
+        self.imgSizer.Add(RBtnSizer, 1, wx.EXPAND)
 
         topSizer.Add(loadSaveSizer, 0, wx.EXPAND)
-        topSizer.Add(imageSizer, 1, wx.CENTER)
+        topSizer.Add(self.imgSizer, 1, wx.EXPAND)
         topSizer.Add(resetAutoSizer, 0, wx.EXPAND)
 
         self.panel.SetSizer(topSizer)
         topSizer.Fit(self)
-        #self.panel.SetSizer(imageSizer)
-        #imageSizer.Fit(self)
+        #self.panel.SetSizer(self.imgSizer)
+        #self.imgSizer.Fit(self)
 
         self.panel.Layout()
+
+        print 'size of imgSizer is '+str(self.imgSizer.GetMinSize()[1])
 
     def onQ1u1(self, event):
         print 'Adding 1 to pixels in Q1'
@@ -185,8 +200,9 @@ class Square(wx.Frame):
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", wildcards, wx.OPEN)
         if (dlg.ShowModal() == wx.ID_OK):
             self.imagePath = dlg.GetPath()
-            img = wx.Image(self.imagePath)
-            self.myImg.SetBitmap(wx.BitmapFromImage(img))
+            self.currentImg = wx.Image(self.imagePath)
+            self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
+            self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
             self.panel.Refresh()
 
     def onSave(self, e=None):
@@ -200,12 +216,21 @@ class Square(wx.Frame):
         # only reset if a file has previously been loaded
         if self.imagePath != '':
             print 'Resetting image...'
-            img = wx.Image(self.imagePath)
-            self.myImg.SetBitmap(wx.BitmapFromImage(img))
+            self.currentImg = wx.Image(self.imagePath)
+            self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
+            self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
             self.panel.Refresh()
 
     def onAuto(self, e=None):
         print 'Autotuning...'
+
+    def onSize(self, e=None):
+        self.imgSize = self.imgSizer.GetSize()[1]
+        print 'Height of image sizer is '+str(self.imgSize)
+        self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
+        self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
+        self.panel.Refresh()
+        e.Skip()
 
 
 # Run the program
