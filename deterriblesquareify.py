@@ -352,15 +352,9 @@ class Square(wx.Frame):
             insideEdge = q4l + q4t
             outsideEdge = q3r + q1b
 
-        if (debug):
-            print 'Inside Edge:'
-            print insideEdge
-            print 'Outside Edge:'
-            print outsideEdge
-
         ## find n which minimizes the rms difference in grayscale intensity along edges of quadrant
         n = 0
-        oldRMSValue = self.rms(insideEdge, outsideEdge)
+        newRMSValue = self.rms(insideEdge, outsideEdge)
 
         nSign = -1
         # case where pixels in quadrant need to be adjusted up
@@ -369,16 +363,18 @@ class Square(wx.Frame):
 
         iter = 0
         maxIter = 255
-        newRMSValue = 0
+        oldRMSValue = 1e10
+        print 'STARTING AUTOTUNE'
         while ((iter < maxIter) and (newRMSValue < oldRMSValue)):
+            oldRMSValue = newRMSValue
             # increase the adjustment to the insideEdge pixels
             n += nSign
-            # don't reset oldRMSValue on the first iteration
-            if (iter > 0):
-                oldRMSValue = newRMSValue
+            print 'n is %s' % n
             # find new adjusted RMS value
             newRMSValue = self.rmsAdjust(insideEdge, outsideEdge, n)
             iter += 1
+            print 'oldRMSValue is %s' % oldRMSValue
+            print 'newRMSValue is %s' % newRMSValue
 
         ## adjust the quadrant
         self.adjustQuadrant(q, n)
@@ -392,17 +388,12 @@ class Square(wx.Frame):
         first vector adjusted by n.
         '''
 
-        if (debug):
-            print 'v1:'
-            #print v1
-            print 'v2:'
-            #print v2
-
         squareSum = 0.0
         for i in range(len(v1)):
-            squareSum += (v1[i] - v2[i])**2
+            squareSum += (v1[i] + n - v2[i])**2
 
-        print (squareSum/len(v1))**0.5
+        print 'RMS is %s' % squareSum
+
         return (squareSum/len(v1))**0.5
 
     def onSize(self, e=None):
