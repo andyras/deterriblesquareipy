@@ -74,7 +74,7 @@ class Square(wx.Frame):
         self.currentImg = wx.EmptyImage(self.imgSize, self.imgSize)
         self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(self.currentImg))
         # clicking the blank image brings up the file loading dialog
-        self.myImg.Bind(wx.EVT_LEFT_DOWN, self.onLoad)
+        self.myImg.Bind(wx.EVT_LEFT_DOWN, self.onImageClick)
 
         # create sizers to hold objects
         topSizer = wx.BoxSizer(wx.VERTICAL)
@@ -231,6 +231,14 @@ class Square(wx.Frame):
         self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
         self.panel.Refresh()
         e.Skip()
+
+    def onImageClick(self, e=None):
+        '''
+        When the blank image is clicked when the program first loads, it brings
+        up a file dialog.  The click binding is then removed'
+        '''
+        self.onLoad()
+        self.myImg.Unbind(wx.EVT_LEFT_DOWN)
 
 
 # Run the program
