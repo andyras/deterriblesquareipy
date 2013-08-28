@@ -184,6 +184,57 @@ class Square(wx.Frame):
 
     def onQ4d10(self, event):
         print 'Subtracting 10 from pixels in Q4'
+        self.adjustQuadrant(4, -40)
+
+    def mm(self, n):
+        '''
+        Sets the integer n to be between 0 and 255
+        '''
+        if (n < 0):
+            return 0
+        elif (n > 255):
+            return 255
+        return n
+
+    def adjustQuadrant(self, q, n):
+        '''
+        Quadrant q is 1, 2, 3, or 4.  n is the adjustment to the RGB values.
+        '''
+        # the origin is at the top left of the image
+        if (q == 1):    # top right quadrant
+            minx = self.currentImg.GetSize()[0]/2 + 0
+            maxx = self.currentImg.GetSize()[0]
+            miny = 0
+            maxy = self.currentImg.GetSize()[1]/2
+        if (q == 2):    # top left quadrant
+            minx = 0
+            maxx = self.currentImg.GetSize()[0]/2
+            miny = 0
+            maxy = self.currentImg.GetSize()[1]/2
+        if (q == 3):    # bottom left quadrant
+            minx = 0
+            maxx = self.currentImg.GetSize()[0]/2
+            miny = self.currentImg.GetSize()[1]/2 + 0
+            maxy = self.currentImg.GetSize()[1]
+        if (q == 4):    # bottom right quadrant
+            minx = self.currentImg.GetSize()[0]/2 + 0
+            maxx = self.currentImg.GetSize()[0]
+            miny = self.currentImg.GetSize()[1]/2 + 0
+            maxy = self.currentImg.GetSize()[1]
+
+        # adjust each pixel in the quadrant
+        for x in range(minx, maxx):
+            for y in range(miny, maxy):
+                r = self.currentImg.GetRed(x, y) + n
+                g = self.currentImg.GetGreen(x, y) + n
+                b = self.currentImg.GetBlue(x, y) + n
+                self.currentImg.SetRGB(x, y, self.mm(r), self.mm(g), self.mm(b))
+                #print r, g, b
+                #self.currentImg.SetRGB(x, y, 0, 0, 0)
+
+        self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
+        self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
+        self.panel.Refresh()
 
     def onLoad(self, e=None):
         '''
@@ -200,6 +251,8 @@ class Square(wx.Frame):
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", wildcards, wx.OPEN)
         if (dlg.ShowModal() == wx.ID_OK):
             self.imagePath = dlg.GetPath()
+            # save the original for resetting
+            self.originalImg = wx.Image(self.imagePath)
             self.currentImg = wx.Image(self.imagePath)
             self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
             self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
@@ -216,8 +269,7 @@ class Square(wx.Frame):
         # only reset if a file has previously been loaded
         if self.imagePath != '':
             print 'Resetting image...'
-            self.currentImg = wx.Image(self.imagePath)
-            self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
+            self.displayImg = self.originalImg.Scale(self.imgSize, self.imgSize)
             self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
             self.panel.Refresh()
 
