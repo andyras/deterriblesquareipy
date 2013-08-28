@@ -11,6 +11,7 @@ class Square(wx.Frame):
 
         # define the maximum displayed image size in pixels
         self.maxImageSize = 1000
+        self.imagePath = ''
 
         # create buttons
         q1u1 = wx.Button(self.panel, wx.ID_ANY, '+1')
@@ -183,7 +184,8 @@ class Square(wx.Frame):
         wildcards = "TIF files (*.tif)|*.tif|PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg"
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", wildcards, wx.OPEN)
         if (dlg.ShowModal() == wx.ID_OK):
-            img = wx.Image(dlg.GetPath())
+            self.imagePath = dlg.GetPath()
+            img = wx.Image(self.imagePath)
             self.myImg.SetBitmap(wx.BitmapFromImage(img))
             self.panel.Refresh()
 
@@ -191,7 +193,16 @@ class Square(wx.Frame):
         print 'Saving...'
 
     def onReset(self, e=None):
-        print 'Resetting image...'
+        '''
+        Reset the currently loaded image to its original state.
+        '''
+
+        # only reset if a file has previously been loaded
+        if self.imagePath != '':
+            print 'Resetting image...'
+            img = wx.Image(self.imagePath)
+            self.myImg.SetBitmap(wx.BitmapFromImage(img))
+            self.panel.Refresh()
 
     def onAuto(self, e=None):
         print 'Autotuning...'
