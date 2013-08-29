@@ -59,7 +59,8 @@ class Square(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.onQ3u10, q3u10)
         self.Bind(wx.EVT_BUTTON, self.onQ3d10, q3d10)
         self.Bind(wx.EVT_BUTTON, self.onQ4u10, q4u10)
-        self.Bind(wx.EVT_BUTTON, self.onQ4d10, q4d10)
+        #self.Bind(wx.EVT_BUTTON, self.onQ4d10, q4d10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(4, -10, event), q4d10)
 
         self.Bind(wx.EVT_BUTTON, self.onLoad, loadBtn)
         self.Bind(wx.EVT_BUTTON, self.onSave, saveBtn)
@@ -198,7 +199,7 @@ class Square(wx.Frame):
             return 255
         return n
 
-    def adjustQuadrant(self, q, n):
+    def adjustQuadrant(self, q, n, e=None):
         '''
         Quadrant q is 1, 2, 3, or 4.  n is the adjustment to the RGB values.
         '''
