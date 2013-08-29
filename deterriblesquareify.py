@@ -119,11 +119,7 @@ class Square(wx.Frame):
         RBtnSizer.Add(q4d10, 1, wx.EXPAND, 0)
 
         self.imgSizer.Add(LBtnSizer, 1, wx.EXPAND)
-        #self.imgSizer.Add((1,1), 1)
-        #self.imgSizer.Add(self.myImg, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.ADJUST_MINSIZE, 10)
-        #self.imgSizer.Add(self.myImg, 0, wx.ALL, border=10)
         self.imgSizer.Add(self.myImg, 0, wx.EXPAND)
-        #self.imgSizer.Add((1,1), 1)
         self.imgSizer.Add(RBtnSizer, 1, wx.EXPAND)
 
         topSizer.Add(loadSaveSizer, 0, wx.EXPAND)
@@ -132,12 +128,8 @@ class Square(wx.Frame):
 
         self.panel.SetSizer(topSizer)
         topSizer.Fit(self)
-        #self.panel.SetSizer(self.imgSizer)
-        #self.imgSizer.Fit(self)
 
         self.panel.Layout()
-
-        print 'size of imgSizer is '+str(self.imgSizer.GetMinSize()[1])
 
     def mm(self, n):
         '''
@@ -184,8 +176,6 @@ class Square(wx.Frame):
                 g = self.currentImg.GetGreen(x, y) + n
                 b = self.currentImg.GetBlue(x, y) + n
                 self.currentImg.SetRGB(x, y, self.mm(r), self.mm(g), self.mm(b))
-                #print r, g, b
-                #self.currentImg.SetRGB(x, y, 0, 0, 0)
 
         self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
         self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
