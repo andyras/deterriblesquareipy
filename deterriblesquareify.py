@@ -195,10 +195,12 @@ class Square(wx.Frame):
         wildcards = "TIF files (*.tif)|*.tif|PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg"
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", wildcards, wx.OPEN)
         if (dlg.ShowModal() == wx.ID_OK):
+            noLog = wx.LogNull()    # disable logging
             self.imagePath = dlg.GetPath()
             # save the original for resetting
             self.originalImg = wx.Image(self.imagePath)
             self.currentImg = wx.Image(self.imagePath)
+            del noLog               # reenable logging
             self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
             self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
             self.panel.Refresh()
@@ -324,7 +326,7 @@ class Square(wx.Frame):
             print 'newRMSValue is %s' % newRMSValue
 
         ## adjust the quadrant
-        print 'Adjusting Q1 by %d grayscale values' % (n - nSign)
+        print 'Adjusting Q%d by %d grayscale values' % (q, (n - nSign))
         self.adjustQuadrant(q, n - nSign)
         print 'FINISHED AUTOTUNE'
 
