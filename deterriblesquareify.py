@@ -44,23 +44,22 @@ class Square(wx.Frame):
         autoBtn = wx.Button(self.panel, wx.ID_ANY, 'Autotune Image')
 
         # bind buttons  
-        self.Bind(wx.EVT_BUTTON, self.onQ1u1, q1u1)
-        self.Bind(wx.EVT_BUTTON, self.onQ1d1, q1d1)
-        self.Bind(wx.EVT_BUTTON, self.onQ2u1, q2u1)
-        self.Bind(wx.EVT_BUTTON, self.onQ2d1, q2d1)
-        self.Bind(wx.EVT_BUTTON, self.onQ3u1, q3u1)
-        self.Bind(wx.EVT_BUTTON, self.onQ3d1, q3d1)
-        self.Bind(wx.EVT_BUTTON, self.onQ4u1, q4u1)
-        self.Bind(wx.EVT_BUTTON, self.onQ4d1, q4d1)
-        self.Bind(wx.EVT_BUTTON, self.onQ1u10, q1u10)
-        self.Bind(wx.EVT_BUTTON, self.onQ1d10, q1d10)
-        self.Bind(wx.EVT_BUTTON, self.onQ2u10, q2u10)
-        self.Bind(wx.EVT_BUTTON, self.onQ2d10, q2d10)
-        self.Bind(wx.EVT_BUTTON, self.onQ3u10, q3u10)
-        self.Bind(wx.EVT_BUTTON, self.onQ3d10, q3d10)
-        self.Bind(wx.EVT_BUTTON, self.onQ4u10, q4u10)
-        #self.Bind(wx.EVT_BUTTON, self.onQ4d10, q4d10)
-        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(4, -10, event), q4d10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(1, 1), q1u1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(1, -1), q1d1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(2, 1), q2u1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(2, -1), q2d1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(3, 1), q3u1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(3, -1), q3d1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(4, 1), q4u1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(4, -1), q4d1)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(1, 10), q1u10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(1, -10), q1d10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(2, 10), q2u10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(2, -10), q2d10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(3, 10), q3u10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(3, -10), q3d10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(4, 10), q4u10)
+        self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(4, -10), q4d10)
 
         self.Bind(wx.EVT_BUTTON, self.onLoad, loadBtn)
         self.Bind(wx.EVT_BUTTON, self.onSave, saveBtn)
@@ -140,55 +139,6 @@ class Square(wx.Frame):
 
         print 'size of imgSizer is '+str(self.imgSizer.GetMinSize()[1])
 
-    def onQ1u1(self, event):
-        print 'Adding 1 to pixels in Q1'
-
-    def onQ1d1(self, event):
-        print 'Subtracting 1 from pixels in Q1'
-
-    def onQ2u1(self, event):
-        print 'Adding 1 to pixels in Q2'
-
-    def onQ2d1(self, event):
-        print 'Subtracting 1 from pixels in Q2'
-
-    def onQ3u1(self, event):
-        print 'Adding 1 to pixels in Q3'
-
-    def onQ3d1(self, event):
-        print 'Subtracting 1 from pixels in Q3'
-
-    def onQ4u1(self, event):
-        print 'Adding 1 to pixels in Q4'
-
-    def onQ4d1(self, event):
-        print 'Subtracting 1 from pixels in Q4'
-
-    def onQ1u10(self, event):
-        print 'Adding 10 to pixels in Q1'
-
-    def onQ1d10(self, event):
-        print 'Subtracting 10 from pixels in Q1'
-
-    def onQ2u10(self, event):
-        print 'Adding 10 to pixels in Q2'
-
-    def onQ2d10(self, event):
-        print 'Subtracting 10 from pixels in Q2'
-
-    def onQ3u10(self, event):
-        print 'Adding 10 to pixels in Q3'
-
-    def onQ3d10(self, event):
-        print 'Subtracting 10 from pixels in Q3'
-
-    def onQ4u10(self, event):
-        print 'Adding 10 to pixels in Q4'
-
-    def onQ4d10(self, event):
-        print 'Subtracting 10 from pixels in Q4'
-        self.adjustQuadrant(4, -40)
-
     def mm(self, n):
         '''
         Sets the integer n to be between 0 and 255
@@ -224,6 +174,8 @@ class Square(wx.Frame):
             maxx = self.currentImg.GetSize()[0]
             miny = self.currentImg.GetSize()[1]/2 + 0
             maxy = self.currentImg.GetSize()[1]
+        else:
+            raise ValueError, 'Invalid quadrant specified.'
 
         # adjust each pixel in the quadrant
         for x in range(minx, maxx):
