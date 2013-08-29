@@ -73,7 +73,7 @@ class Square(wx.Frame):
         #img = wx.Image('test2.tif', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         #self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(img))
         #wx.StaticBitmap(self, -1, img, (10,5), (img.GetWidth(), img.GetHeight()))
-        self.currentImg = wx.EmptyImage(self.imgSize, self.imgSize)
+        self.currentImg = wx.EmptyImage(1,1)
         self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(self.currentImg))
         # clicking the blank image brings up the file loading dialog
         self.myImg.Bind(wx.EVT_LEFT_DOWN, self.onImageClick)
@@ -159,17 +159,17 @@ class Square(wx.Frame):
             maxx = self.currentImg.GetSize()[0]
             miny = 0
             maxy = self.currentImg.GetSize()[1]/2
-        if (q == 2):    # top left quadrant
+        elif (q == 2):    # top left quadrant
             minx = 0
             maxx = self.currentImg.GetSize()[0]/2
             miny = 0
             maxy = self.currentImg.GetSize()[1]/2
-        if (q == 3):    # bottom left quadrant
+        elif (q == 3):    # bottom left quadrant
             minx = 0
             maxx = self.currentImg.GetSize()[0]/2
             miny = self.currentImg.GetSize()[1]/2 + 0
             maxy = self.currentImg.GetSize()[1]
-        if (q == 4):    # bottom right quadrant
+        elif (q == 4):    # bottom right quadrant
             minx = self.currentImg.GetSize()[0]/2 + 0
             maxx = self.currentImg.GetSize()[0]
             miny = self.currentImg.GetSize()[1]/2 + 0
