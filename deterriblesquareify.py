@@ -379,6 +379,9 @@ class Square(wx.Frame):
         return wx.ImageFromBuffer(a.shape[0], a.shape[1], np.ascontiguousarray(a))
         
     def rms(self, v1, v2):
+        '''
+        Gives the RMS difference between vectors v1 and v2
+        '''
         return self.rmsAdjust(v1, v2, 0.0)
 
     def rmsAdjust(self, v1, v2, n):
