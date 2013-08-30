@@ -68,15 +68,13 @@ class Square(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.onReset, resetBtn)
         self.Bind(wx.EVT_BUTTON, self.onAuto, autoBtn)
 
+        # bind image resize event
         self.Bind(wx.EVT_SIZE, self.onSize)
 
         # create image object
-        #img = wx.Image('test2.tif')
-        #img = wx.Image('test2.tif', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        #self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(img))
-        #wx.StaticBitmap(self, -1, img, (10,5), (img.GetWidth(), img.GetHeight()))
-        self.currentImg = wx.EmptyImage(1,1)
-        self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(self.currentImg))
+        self.imgArray = np.zeros((1,1,3), dtype='uint8')
+        self.myImg = wx.StaticBitmap(self.panel, wx.ID_ANY, wx.BitmapFromImage(self.numpyToWxImage(self.imgArray)))
+
         # clicking the blank image brings up the file loading dialog
         self.myImg.Bind(wx.EVT_LEFT_DOWN, self.onImageClick)
 
@@ -133,63 +131,6 @@ class Square(wx.Frame):
 
         self.panel.Layout()
 
-    def mm(self, n):
-        '''
-        Sets the integer n to be between 0 and 255
-        '''
-        if (n < 0):
-            return 0
-        elif (n > 255):
-            return 255
-        return n
-
-    def adjustQuadrant(self, q, n, e=None):
-        '''
-        Quadrant q is 1, 2, 3, or 4.  n is the adjustment to the RGB values.
-        '''
-
-        # the origin is at the top left of the image
-        # TODO maybe switch the 0 and 1 in the shape array accesses
-        if (q == 1):    # top right quadrant
-            minx = self.imgArray.shape[0]/2 + 0
-            maxx = self.imgArray.shape[0]
-            miny = 0
-            maxy = self.imgArray.shape[1]/2
-        elif (q == 2):    # top left quadrant
-            minx = 0
-            maxx = self.imgArray.shape[0]/2
-            miny = 0
-            maxy = self.imgArray.shape[1]/2
-        elif (q == 3):    # bottom left quadrant
-            minx = 0
-            maxx = self.imgArray.shape[0]/2
-            miny = self.imgArray.shape[1]/2 + 0
-            maxy = self.imgArray.shape[1]
-        elif (q == 4):    # bottom right quadrant
-            minx = self.imgArray.shape[0]/2 + 0
-            maxx = self.imgArray.shape[0]
-            miny = self.imgArray.shape[1]/2 + 0
-            maxy = self.imgArray.shape[1]
-        else:
-            raise ValueError, 'Invalid quadrant specified.'
-
-        # convert to signed 32-bit int
-        imgArrayCopy = np.int32(self.imgArray)
-
-        # shift the RGB values in each pixel
-        imgArrayCopy[miny:maxy,minx:maxx,:] += n
-
-        # clip values to account for wrapping of RGB values
-        imgArrayCopy = np.clip(imgArrayCopy, 0, 255)
-
-        # convert back to signed 8-bit int
-        self.imgArray = np.uint8(imgArrayCopy)
-
-        # display altered image
-        self.displayImg = self.numpyToWxImage(self.imgArray).Scale(self.imgSize, self.imgSize)
-        self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
-        self.panel.Refresh()
-
     def onLoad(self, e=None):
         '''
         Load an image file.
@@ -218,7 +159,6 @@ class Square(wx.Frame):
 
             # goof around with formats
             self.imgArray = self.wxImageToNumpy(self.originalImg)
-            self.currentImg = self.numpyToWxImage(self.imgArray)
 
             # scale the original for display (saves a step for the first display)
             self.displayImg = self.originalImg.Scale(self.imgSize, self.imgSize)
@@ -229,31 +169,18 @@ class Square(wx.Frame):
             self.panel.Refresh()
         dlg.Destroy()
 
-    def wxImageToNumpy(self, img):
+    def onImageClick(self, e=None):
         '''
-        Converts a wx.Image to a numpy array.
+        When the blank image is clicked when the program first loads, it brings
+        up a file dialog.  The click binding is then removed'
         '''
-
-        # datatype is important
-        a = np.frombuffer(img.GetData(), dtype='uint8')
-
-        # note that height is the first dimension in the np.array.
-        # (x and y are switched)
-        a.shape = (img.GetHeight(), img.GetWidth(), 3)
-
-        # make array manipulable
-        a.flags.writeable = True
-
-        return a
-
-    def numpyToWxImage(self, a):
-        '''
-        Converts a numpy array to a wx.Image.
-        '''
-
-        # note the use of the ascontiguousarray method, otherwise it may break for big arrays
-        return wx.ImageFromBuffer(a.shape[0], a.shape[1], np.ascontiguousarray(a))
         
+        # load an image
+        self.onLoad()
+
+        # unbind clicking on the image
+        self.myImg.Unbind(wx.EVT_LEFT_DOWN)
+
     def onSave(self, e=None):
         '''
         Saves the image in an arbitrary format.
@@ -379,6 +306,78 @@ class Square(wx.Frame):
         self.adjustQuadrant(q, n - nSign)
         print 'FINISHED AUTOTUNE'
 
+    def adjustQuadrant(self, q, n, e=None):
+        '''
+        Quadrant q is 1, 2, 3, or 4.  n is the adjustment to the RGB values.
+        '''
+
+        # the origin is at the top left of the image
+        # TODO maybe switch the 0 and 1 in the shape array accesses
+        if (q == 1):    # top right quadrant
+            minx = self.imgArray.shape[0]/2 + 0
+            maxx = self.imgArray.shape[0]
+            miny = 0
+            maxy = self.imgArray.shape[1]/2
+        elif (q == 2):    # top left quadrant
+            minx = 0
+            maxx = self.imgArray.shape[0]/2
+            miny = 0
+            maxy = self.imgArray.shape[1]/2
+        elif (q == 3):    # bottom left quadrant
+            minx = 0
+            maxx = self.imgArray.shape[0]/2
+            miny = self.imgArray.shape[1]/2 + 0
+            maxy = self.imgArray.shape[1]
+        elif (q == 4):    # bottom right quadrant
+            minx = self.imgArray.shape[0]/2 + 0
+            maxx = self.imgArray.shape[0]
+            miny = self.imgArray.shape[1]/2 + 0
+            maxy = self.imgArray.shape[1]
+        else:
+            raise ValueError, 'Invalid quadrant specified.'
+
+        # convert to signed 32-bit int
+        imgArrayCopy = np.int32(self.imgArray)
+
+        # shift the RGB values in each pixel
+        imgArrayCopy[miny:maxy,minx:maxx,:] += n
+
+        # clip values to account for wrapping of RGB values
+        imgArrayCopy = np.clip(imgArrayCopy, 0, 255)
+
+        # convert back to signed 8-bit int
+        self.imgArray = np.uint8(imgArrayCopy)
+
+        # display altered image
+        self.displayImg = self.numpyToWxImage(self.imgArray).Scale(self.imgSize, self.imgSize)
+        self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
+        self.panel.Refresh()
+
+    def wxImageToNumpy(self, img):
+        '''
+        Converts a wx.Image to a numpy array.
+        '''
+
+        # datatype is important
+        a = np.frombuffer(img.GetData(), dtype='uint8')
+
+        # note that height is the first dimension in the np.array.
+        # (x and y are switched)
+        a.shape = (img.GetHeight(), img.GetWidth(), 3)
+
+        # make array manipulable
+        a.flags.writeable = True
+
+        return a
+
+    def numpyToWxImage(self, a):
+        '''
+        Converts a numpy array to a wx.Image.
+        '''
+
+        # note the use of the ascontiguousarray method, otherwise it may break for big arrays
+        return wx.ImageFromBuffer(a.shape[0], a.shape[1], np.ascontiguousarray(a))
+        
     def rms(self, v1, v2):
         return self.rmsAdjust(v1, v2, 0.0)
 
@@ -397,23 +396,9 @@ class Square(wx.Frame):
     def onSize(self, e=None):
         # scale image to height of sizer
         self.imgSize = self.imgSizer.GetSize()[1]
-        self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
-        self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
+        self.myImg.SetBitmap(wx.BitmapFromImage(self.numpyToWxImage(self.imgArray).Scale(self.imgSize, self.imgSize)))
         self.panel.Refresh()
         e.Skip()
-
-    def onImageClick(self, e=None):
-        '''
-        When the blank image is clicked when the program first loads, it brings
-        up a file dialog.  The click binding is then removed'
-        '''
-        
-        # load an image
-        self.onLoad()
-
-        # unbind clicking on the image
-        self.myImg.Unbind(wx.EVT_LEFT_DOWN)
-
 
 # Run the program
 if __name__ == '__main__':
