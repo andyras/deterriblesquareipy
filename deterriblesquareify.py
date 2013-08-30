@@ -1,6 +1,8 @@
 #!/usr/bin/env python2.7
 
 import wx
+import numpy as np
+from scipy.misc import imread
 
 debug = True
 
@@ -195,16 +197,51 @@ class Square(wx.Frame):
         wildcards = "TIF files (*.tif)|*.tif|PNG files (*.png)|*.png|JPG files (*.jpg)|*.jpg"
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", wildcards, wx.OPEN)
         if (dlg.ShowModal() == wx.ID_OK):
-            noLog = wx.LogNull()    # disable logging
             self.imagePath = dlg.GetPath()
+
+            # disable logging (.tif[f]s with funny tags cause a pop-up error)
+            noLog = wx.LogNull()
+
             # save the original for resetting
             self.originalImg = wx.Image(self.imagePath)
             self.currentImg = wx.Image(self.imagePath)
-            del noLog               # reenable logging
-            self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
+
+            # reenable logging
+            del noLog
+
+            # goof around with formats
+            self.imgArray = self.wxImageToNumpy(self.originalImg)
+            self.currentImg = self.numpyToWxImage(self.imgArray)
+
+            # scale the original for display (saves a step for the first display)
+            self.displayImg = self.originalImg.Scale(self.imgSize, self.imgSize)
+            #self.displayImg = self.numpyToWxImage(self.imgArray).Scale(self.imgSize, self.imgSize)
+
+            # display the loaded image
             self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
             self.panel.Refresh()
 
+    def wxImageToNumpy(self, img):
+        '''
+        Converts a wx.Image to a numpy array.
+        '''
+
+        # datatype is important
+        a = np.frombuffer(img.GetData(), dtype='uint8')
+        # note that height is the first dimension in the np.array.
+        # (x and y are switched)
+        a.shape = (img.GetHeight(), img.GetWidth(), 3)
+
+        return a
+
+    def numpyToWxImage(self, a):
+        '''
+        Converts a numpy array to a wx.Image.
+        '''
+
+        # note the use of the ascontiguousarray method, otherwise it may break for big arrays
+        return wx.ImageFromBuffer(a.shape[0], a.shape[1], np.ascontiguousarray(a))
+        
     def onSave(self, e=None):
         print 'Saving...'
 
