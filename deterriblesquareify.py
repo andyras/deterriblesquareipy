@@ -2,7 +2,7 @@
 
 import wx
 import numpy as np
-from scipy.misc import imread,imsave
+from scipy.misc import imsave
 
 debug = False
 
