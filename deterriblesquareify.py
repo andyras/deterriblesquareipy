@@ -2,7 +2,7 @@
 
 import wx
 import numpy as np
-from scipy.misc import imread
+from scipy.misc import imread,imsave
 
 debug = True
 
@@ -205,6 +205,7 @@ class Square(wx.Frame):
         dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", wildcards, wx.OPEN)
         if (dlg.ShowModal() == wx.ID_OK):
             self.imagePath = dlg.GetPath()
+            self.fileName = dlg.GetFilename()
 
             # disable logging (.tif[f]s with funny tags cause a pop-up error)
             noLog = wx.LogNull()
@@ -227,6 +228,7 @@ class Square(wx.Frame):
             # display the loaded image
             self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
             self.panel.Refresh()
+        dlg.Destroy()
 
     def wxImageToNumpy(self, img):
         '''
@@ -254,7 +256,17 @@ class Square(wx.Frame):
         return wx.ImageFromBuffer(a.shape[0], a.shape[1], np.ascontiguousarray(a))
         
     def onSave(self, e=None):
+        '''
+        Saves the image in an arbitrary format.
+        '''
         print 'Saving...'
+        dlg = wx.FileDialog(self, "Choose a file name", self.dirname, 'CORRECTED_'+str(self.fileName), "*.*", wx.SAVE)
+        if (dlg.ShowModal() == wx.ID_OK):
+            self.saveFileName = dlg.GetFilename()
+            self.saveDirName = dlg.GetDirectory()
+            self.newImagePath = dlg.GetPath()
+            imsave(self.newImagePath, self.imgArray)
+        dlg.Destroy()
 
     def onReset(self, e=None):
         '''
