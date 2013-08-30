@@ -264,6 +264,9 @@ class Square(wx.Frame):
         # only reset if a file has previously been loaded
         if self.imagePath != '':
             print 'Resetting image...'
+            # reset array which is manipulated
+            self.imgArray = self.wxImageToNumpy(self.originalImg)
+            # reset display image
             self.displayImg = self.originalImg.Scale(self.imgSize, self.imgSize)
             self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
             self.panel.Refresh()
