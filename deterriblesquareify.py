@@ -148,38 +148,44 @@ class Square(wx.Frame):
         Quadrant q is 1, 2, 3, or 4.  n is the adjustment to the RGB values.
         '''
         # the origin is at the top left of the image
+        # TODO maybe switch the 0 and 1 in the shape array accesses
         if (q == 1):    # top right quadrant
-            minx = self.currentImg.GetSize()[0]/2 + 0
-            maxx = self.currentImg.GetSize()[0]
+            minx = self.imgArray.shape[0]/2 + 0
+            maxx = self.imgArray.shape[0]
             miny = 0
-            maxy = self.currentImg.GetSize()[1]/2
+            maxy = self.imgArray.shape[1]/2
         elif (q == 2):    # top left quadrant
             minx = 0
-            maxx = self.currentImg.GetSize()[0]/2
+            maxx = self.imgArray.shape[0]/2
             miny = 0
-            maxy = self.currentImg.GetSize()[1]/2
+            maxy = self.imgArray.shape[1]/2
         elif (q == 3):    # bottom left quadrant
             minx = 0
-            maxx = self.currentImg.GetSize()[0]/2
-            miny = self.currentImg.GetSize()[1]/2 + 0
-            maxy = self.currentImg.GetSize()[1]
+            maxx = self.imgArray.shape[0]/2
+            miny = self.imgArray.shape[1]/2 + 0
+            maxy = self.imgArray.shape[1]
         elif (q == 4):    # bottom right quadrant
-            minx = self.currentImg.GetSize()[0]/2 + 0
-            maxx = self.currentImg.GetSize()[0]
-            miny = self.currentImg.GetSize()[1]/2 + 0
-            maxy = self.currentImg.GetSize()[1]
+            minx = self.imgArray.shape[0]/2 + 0
+            maxx = self.imgArray.shape[0]
+            miny = self.imgArray.shape[1]/2 + 0
+            maxy = self.imgArray.shape[1]
         else:
             raise ValueError, 'Invalid quadrant specified.'
 
-        # adjust each pixel in the quadrant
-        for x in range(minx, maxx):
-            for y in range(miny, maxy):
-                r = self.currentImg.GetRed(x, y) + n
-                g = self.currentImg.GetGreen(x, y) + n
-                b = self.currentImg.GetBlue(x, y) + n
-                self.currentImg.SetRGB(x, y, self.mm(r), self.mm(g), self.mm(b))
+        # convert to signed 32-bit int
+        imgArrayCopy = np.int32(self.imgArray)
 
-        self.displayImg = self.currentImg.Scale(self.imgSize, self.imgSize)
+        # shift the RGB values in each pixel
+        imgArrayCopy[miny:maxy,minx:maxx,:] += n
+
+        # clip values to account for wrapping of RGB values
+        imgArrayCopy = np.clip(imgArrayCopy, 0, 255)
+
+        # convert back to signed 8-bit int
+        self.imgArray = np.uint8(imgArrayCopy)
+
+        # display altered image
+        self.displayImg = self.numpyToWxImage(self.imgArray).Scale(self.imgSize, self.imgSize)
         self.myImg.SetBitmap(wx.BitmapFromImage(self.displayImg))
         self.panel.Refresh()
 
@@ -228,9 +234,13 @@ class Square(wx.Frame):
 
         # datatype is important
         a = np.frombuffer(img.GetData(), dtype='uint8')
+
         # note that height is the first dimension in the np.array.
         # (x and y are switched)
         a.shape = (img.GetHeight(), img.GetWidth(), 3)
+
+        # make array manipulable
+        a.flags.writeable = True
 
         return a
 
