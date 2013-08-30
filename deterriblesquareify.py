@@ -147,6 +147,7 @@ class Square(wx.Frame):
         '''
         Quadrant q is 1, 2, 3, or 4.  n is the adjustment to the RGB values.
         '''
+
         # the origin is at the top left of the image
         # TODO maybe switch the 0 and 1 in the shape array accesses
         if (q == 1):    # top right quadrant
@@ -210,7 +211,7 @@ class Square(wx.Frame):
 
             # save the original for resetting
             self.originalImg = wx.Image(self.imagePath)
-            self.currentImg = wx.Image(self.imagePath)
+            #self.currentImg = wx.Image(self.imagePath)
 
             # reenable logging
             del noLog
@@ -274,8 +275,11 @@ class Square(wx.Frame):
 
         print 'Autotuning...'
 
-        xDim = self.currentImg.GetSize()[0]
-        yDim = self.currentImg.GetSize()[1]
+        #xDim = self.currentImg.GetSize()[0]
+        #yDim = self.currentImg.GetSize()[1]
+        # TODO maybe switch the 0 and 1
+        xDim = self.imgArray.shape[0]
+        yDim = self.imgArray.shape[1]
 
         if (debug):
             print 'xDim '+str(xDim)
@@ -285,32 +289,47 @@ class Square(wx.Frame):
         #TODO read grayscale values as matrix
 
         # bottom of Q1 and top of Q4
+        q1b = self.imgArray[(xDim/2 - 1), (yDim/2):yDim, 1]
+        q4t = self.imgArray[(xDim/2), (yDim/2):yDim, 1]
+        '''
+        print q1b
+        del q1b
         q1b = []
-        q4t = []
         for x in range(xDim/2, xDim):
             q1b.append(self.currentImg.GetRed(x, yDim/2 - 1))
-            q4t.append(self.currentImg.GetRed(x, yDim/2))
+            #q4t.append(self.currentImg.GetRed(x, yDim/2))
+        print q1b
+        '''
 
         # left of Q1 and right of Q2
-        q1l = []
-        q2r = []
-        for y in range(0, yDim/2):
-            q1l.append(self.currentImg.GetRed(xDim/2, y))
-            q2r.append(self.currentImg.GetRed(xDim/2 - 1, y))
+        q1l = self.imgArray[0:(xDim/2), yDim/2, 1]
+        q2r = self.imgArray[0:(xDim/2), yDim/2 - 1, 1]
+        #for y in range(0, yDim/2):
+            #q1l.append(self.currentImg.GetRed(xDim/2, y))
+            #q2r.append(self.currentImg.GetRed(xDim/2 - 1, y))
 
         # bottom of Q2 and top of Q3
-        q2b = []
-        q3t = []
-        for x in range(0, xDim/2):
-            q2b.append(self.currentImg.GetRed(x, yDim/2 - 1))
-            q3t.append(self.currentImg.GetRed(x, yDim/2))
+        q2b = self.imgArray[(xDim/2 - 1), 0:(yDim/2), 1]
+        q3t = self.imgArray[(xDim/2), 0:(yDim/2), 1]
+        #for x in range(0, xDim/2):
+            #q2b.append(self.currentImg.GetRed(x, yDim/2 - 1))
+            #q3t.append(self.currentImg.GetRed(x, yDim/2))
 
         # right of Q3 and left of Q4
-        q3r = []
-        q4l = []
-        for y in range(yDim/2, yDim):
-            q3r.append(self.currentImg.GetRed(xDim/2 - 1, y))
-            q4l.append(self.currentImg.GetRed(xDim/2, y))
+        q3r = self.imgArray[(xDim/2):xDim, (yDim/2 - 1), 1]
+        q4l = self.imgArray[(xDim/2):xDim, (yDim/2), 1]
+        #for y in range(yDim/2, yDim):
+            #q3r.append(self.currentImg.GetRed(xDim/2 - 1, y))
+            #q4l.append(self.currentImg.GetRed(xDim/2, y))
+
+        print 'q1b, q1l'
+        print q1b, q1l
+        print 'q2r, q2b'
+        print q2r, q2b
+        print 'q3t, q3r'
+        print q3t, q3r
+        print 'q4l, q4t'
+        print q4l, q4t
 
         ## find which quadrant is most likely to be the maladjusted one
         # calculate rms difference for each edge
@@ -320,37 +339,49 @@ class Square(wx.Frame):
         rmsBottom = self.rms(q3r, q4l)
 
         # each quadrant has two edges
-        print rmsTop
+        print 'Top, Bottom, Right, Left'
+        print rmsTop, rmsBottom, rmsRight, rmsLeft
         rmsQ1 = rmsTop + rmsRight
         rmsQ2 = rmsTop + rmsLeft
         rmsQ3 = rmsLeft + rmsBottom
         rmsQ4 = rmsBottom + rmsRight
+        print 'Q1, Q2, Q3, Q4'
+        print rmsQ1, rmsQ2, rmsQ3, rmsQ4
 
         # find the largest
         if (max(rmsQ1, rmsQ2, rmsQ3, rmsQ4) == rmsQ1):
             q = 1
-            insideEdge = q1l + q1b
-            outsideEdge = q2r + q4t
+            #insideEdge = q1l + q1b
+            insideEdge = np.append(q1l, q1b)
+            #outsideEdge = q2r + q4t
+            outsideEdge = np.append(q2r, q4t)
             print 'Q1 will be adjusted'
         elif (max(rmsQ1, rmsQ2, rmsQ3, rmsQ4) == rmsQ2):
             q = 2
-            insideEdge = q2r + q2b
-            outsideEdge = q1l + q3t
+            #insideEdge = q2r + q2b
+            insideEdge = np.append(q2r, q2b)
+            #outsideEdge = q1l + q3t
+            outsideEdge = np.append(q1l, q3t)
             print 'Q2 will be adjusted'
         elif (max(rmsQ1, rmsQ2, rmsQ3, rmsQ4) == rmsQ3):
             q = 3
-            insideEdge = q3r + q3t
-            outsideEdge = q4l + q2b
+            #insideEdge = q3r + q3t
+            insideEdge = np.append(q3r, q3t)
+            #outsideEdge = q4l + q2b
+            outsideEdge = np.append(q4l, q2b)
             print 'Q3 will be adjusted'
         else:
             q = 4
-            insideEdge = q4l + q4t
-            outsideEdge = q3r + q1b
+            #insideEdge = q4l + q4t
+            insideEdge = np.append(q4l, q4t)
+            #outsideEdge = q3r + q1b
+            outsideEdge = np.append(q3r, q1b)
             print 'Q4 will be adjusted'
 
         ## find n which minimizes the rms difference in grayscale intensity along edges of quadrant
         n = 0
         newRMSValue = self.rms(insideEdge, outsideEdge)
+        print 'newRMSValue is first %s' % newRMSValue
 
         nSign = -1
         # case where pixels in quadrant need to be adjusted up
@@ -378,14 +409,19 @@ class Square(wx.Frame):
         print 'FINISHED AUTOTUNE'
 
     def rms(self, v1, v2):
-        return self.rmsAdjust(v1, v2, 0)
+        return self.rmsAdjust(v1, v2, 0.0)
 
     def rmsAdjust(self, v1, v2, n):
         '''
         Finds the RMS difference between two vectors, with the values in the
         first vector adjusted by n.
         '''
+        newV1 = np.array(v1, dtype=float)
+        newV2 = np.array(v2, dtype=float)
 
+        return np.sqrt(np.mean((newV1 + n - newV2)**2))
+
+        '''
         squareSum = 0.0
         for i in range(len(v1)):
             squareSum += (v1[i] + n - v2[i])**2
@@ -393,6 +429,7 @@ class Square(wx.Frame):
         print 'RMS is %s' % squareSum
 
         return (squareSum/len(v1))**0.5
+        '''
 
     def onSize(self, e=None):
         self.imgSize = self.imgSizer.GetSize()[1]
