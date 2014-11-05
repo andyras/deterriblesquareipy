@@ -45,7 +45,7 @@ class Square(wx.Frame):
         resetBtn = wx.Button(self.panel, wx.ID_ANY, 'Reset Image')
         autoBtn = wx.Button(self.panel, wx.ID_ANY, 'Autotune Image')
 
-        # bind buttons  
+        # bind buttons
         self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(1, 1), q1u1)
         self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(1, -1), q1d1)
         self.Bind(wx.EVT_BUTTON, lambda event: self.adjustQuadrant(2, 1), q2u1)
@@ -174,7 +174,7 @@ class Square(wx.Frame):
         When the blank image is clicked when the program first loads, it brings
         up a file dialog.  The click binding is then removed'
         '''
-        
+
         # load an image
         self.onLoad()
 
@@ -377,7 +377,7 @@ class Square(wx.Frame):
 
         # note the use of the ascontiguousarray method, otherwise it may break for big arrays
         return wx.ImageFromBuffer(a.shape[0], a.shape[1], np.ascontiguousarray(a))
-        
+
     def rms(self, v1, v2):
         '''
         Gives the RMS difference between vectors v1 and v2
