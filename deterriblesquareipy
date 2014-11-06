@@ -8,7 +8,7 @@ from scipy.misc import imsave
 
 parser = ap.ArgumentParser(description='Script to fix TEM images with bad quadrants')
 parser.add_argument('-d', '--debug', help='Turn on debugging output', action='store_true')
-parser.add_argument('-n', help='Number of autotuning steps', type=int, default=4)
+parser.add_argument('-n', help='Number of autotuning steps (default is 4)', type=int, default=4)
 parser.add_argument('images', nargs='+', metavar='filename', help='image(s) to be processed')
 
 args = parser.parse_args()
